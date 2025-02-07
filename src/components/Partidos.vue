@@ -1,6 +1,6 @@
 <template>
   <div class="fondo-limitado mx-auto py-8">
-    <div class="w-full max-w-3x1 mx-auto p-6 bg-white shadow-md rounded-lg" id="partido">
+    <div class="w-full max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg" id="partido">
       <h1 class="text-2xl text-cyan-500 font-bold mb-6">Partidos disponibles</h1>
 
       <!-- Componente Loader mientras los partidos están cargando -->
@@ -83,7 +83,6 @@
             </div>
           </div>
         </div>
-
         <!-- Modal de pago con Mercado Pago -->
         <div v-if="modalPagoVisible" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div class="bg-white p-6 rounded-lg max-w-md">
