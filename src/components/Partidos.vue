@@ -22,7 +22,7 @@
             <div class="w-full h-[35rem] relative rounded overflow-hidden mb-4 bg-gray-100">
               <!-- Se muestra la imagen del partido según el deporte -->
               <img :src="`/img/${partido.imagen}`" alt="Imagen del partido"
-                class="absolute inset-0 w-full h-full object-cover" />
+                class="absolute inset-0 w-full h-full md:h-80 object-cover" />
             </div>
 
             <h2 class="text-xl font-semibold mb-2">
@@ -83,6 +83,14 @@
             </div>
           </div>
         </div>
+        <!-- Modal de pago con Mercado Pago -->
+        <div v-if="modalPagoVisible" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div class="bg-white p-6 rounded-lg max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Formulario de Pago</h2>
+            <div id="wallet_container"></div>
+            <button @click="cerrarModalPago" class="mt-4 bg-gray-500 text-white rounded p-2">Cancelar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -106,6 +114,8 @@ export default {
     const cargando = ref(true); // Estado de carga
     const filtroDeporte = ref(""); // Filtro por deporte
     const filtroCercania = ref(false); // Filtro por cercanía
+    const modalVisible = ref(false);
+    const modalPagoVisible = ref(false);
     const partidoUnido = ref(null); // Partido al que el usuario se unió
 
     // Objeto que asocia el deporte con su imagen (en formato webp)
@@ -136,7 +146,7 @@ export default {
         })
         .map((partido) => ({
           ...partido,
-          imagen: imagenesDeportes[partido.deporte] || "default.svg"
+          imagen: imagenesDeportes[partido.deporte] || "default.webp"
         }))
         .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora)); // Ordenar por fecha ascendente
     });
@@ -219,6 +229,40 @@ export default {
       }
     };
 
+    const abrirModalPago = async () => {
+      modalPagoVisible.value = true;
+
+      try {
+        const response = await fetch("https://tu-servidor.com/api/mercadopago", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ price: partidoUnido.value.precio }),
+        });
+
+        const { preferenceId } = await response.json();
+
+        initMercadoPago("TU_PUBLIC_KEY", { locale: "es-AR" });
+
+        const mp = initMercadoPago("TU_PUBLIC_KEY", { locale: "es-AR" });
+
+        const bricks = mp.bricks();
+        bricks.create("wallet", "wallet_container", {
+          initialization: { preferenceId },
+        });
+
+        bricks.create("wallet", "wallet_container", {
+          initialization: { preferenceId },
+        });
+
+      } catch (error) {
+        console.error("Error al inicializar Mercado Pago", error);
+      }
+    };
+
+    const cerrarModalPago = () => {
+      modalPagoVisible.value = false;
+    };
+
     onMounted(() => {
       cargarPartidos();
     });
@@ -232,7 +276,11 @@ export default {
       unirseAPartido,
       formatoFechaHora,
       abreviarDireccion,
+      modalVisible,
       partidoUnido,
+      modalPagoVisible,
+      abrirModalPago,
+      cerrarModalPago,
       cargando
     };
   },
